@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>GSR - Gunshot Radar</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <style>
+        body {
+            background-color: #0a0a0a;
+            color: #00ff00;
+            font-family: 'Courier New', Courier, monospace;
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .map-container {
+            flex: 0 0 70%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border-right: 2px solid #333;
+        }
+
+        /* SKALA: 1 meter = 150 pixlar 
+           Bredd: 4.8m * 150 = 720px
+           Höjd: 3.7m * 150 = 555px
+        */
+        #map {
+            position: relative;
+            width: 720px;
+            height: 555px;
+            background-color: #111;
+            background-image: 
+                linear-gradient(rgba(0,255,0,.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,255,0,.1) 1px, transparent 1px);
+            background-size: 75px 75px; /* Rutnät varje 0.5m (150/2) */
+            border: 3px solid #00ff00;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.4);
+        }
+
+        .sidebar {
+            flex: 1;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            background-color: #0f0f0f;
+            overflow-y: auto;
+        }
+
+        h2 { border-bottom: 1px solid #00ff00; padding-bottom: 10px; margin-top: 0; }
+
+        .log-entry {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            margin-bottom: 10px;
+            padding: 10px;
+            border-left: 4px solid #ff0000;
+        }
+
+        .impact-container {
+            position: absolute;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+        }
+        
+        .dot {
+            width: 12px;
+            height: 12px;
+            background-color: #ff0000;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #ff0000;
+        }
+
+        .label {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 2px 5px;
+            font-size: 10px;
+            border: 1px solid red;
+            white-space: nowrap;
+        }
+
+        .node-label {
+            position: absolute;
+            color: #555;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        #clear-btn {
+            background: #440000;
+            color: white;
+            border: 1px solid red;
+            padding: 10px;
+            cursor: pointer;
+            margin-top: 20px;
+            width: 100%;
+        }
+        #clear-btn:hover { background: #aa0000; }
+    </style>
+</head>
+<body>
+
+<div class="map-container">
+    <div id="map">
+        <div class="node-label" style="bottom: 5px; left: 5px;">N1 (0,0)</div>
+        <div class="node-label" style="bottom: 5px; right: 5px;">N2 (4.8, 0)</div>
+        <div class="node-label" style="top: 5px; right: 5px;">N3 (4.8, 3.7)</div>
+        <div class="node-label" style="top: 5px; left: 5px;">N4 (0, 3.7)</div>
+    </div>
+    <button id="clear-btn" onclick="clearMap()">RENSA KARTA</button>
+</div>
+
+<div class="sidebar">
+    <h2>RADAR LOGG</h2>
+    <div id="log-list"></div>
+</div>
+
+<script>
+    var socket = io();
+    var logList = document.getElementById('log-list');
+    var map = document.getElementById('map');
+    var scale = 150; // 1 meter = 150 pixlar
+
+    socket.on('location_update', function(data) {
+        // 1. Logga i listan
+        let entry = document.createElement('div');
+        entry.className = 'log-entry';
+        entry.innerHTML = `
+            <strong>EVENT #${data.id}</strong><br>
+            X: ${data.x.toFixed(2)}m | Y: ${data.y.toFixed(2)}m<br>
+            <small>${data.nodes.join(' ')}</small>
+        `;
+        logList.insertBefore(entry, logList.firstChild);
+
+        // 2. Placera på kartan
+        let container = document.createElement('div');
+        container.className = 'impact-container';
+        
+        // BERÄKNING:
+        // xPx = x-värde * skala
+        // yPx = (Maxhöjd - y-värde) * skala  <-- Detta vänder axeln rätt
+        let xPx = data.x * scale;
+        let yPx = (3.7 - data.y) * scale;
+
+        container.style.left = xPx + 'px';
+        container.style.top = yPx + 'px';
+
+        container.innerHTML = `
+            <div class="dot"></div>
+            <div class="label">#${data.id}</div>
+        `;
+        map.appendChild(container);
+    });
+
+    function clearMap() {
+        document.getElementById('log-list').innerHTML = '';
+        let impacts = document.getElementsByClassName('impact-container');
+        while(impacts[0]) {
+            impacts[0].parentNode.removeChild(impacts[0]);
+        }
+    }
+</script>
+
+</body>
+</html>

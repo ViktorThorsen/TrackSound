@@ -1,0 +1,29 @@
+# --- Dina specifika filer ---
+env
+llm_agent.py
+nodes_MAC.txt
+sound_classifier.h5
+ei-identifier-arduino-1.0.3.zip
+dataset/
+
+# --- Python Standard ---
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+ENV/
+.pytest_cache/
+
+# --- React/Node Standard ---
+node_modules/
+/build
+/dist
+.eslintcache
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# --- OS specifikt ---
+.DS_Store
+Thumbs.db
