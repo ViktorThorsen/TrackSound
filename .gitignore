@@ -5,6 +5,7 @@ nodes_MAC.txt
 sound_classifier.h5
 ei-identifier-arduino-1.0.3.zip
 dataset/
+debug_audio/
 
 # --- Python Standard ---
 __pycache__/

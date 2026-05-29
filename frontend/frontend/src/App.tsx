@@ -191,7 +191,28 @@ export default function App() {
   const [config, setConfig] = useState<Config>({ temp: 21.5, width: 4.8, height: 3.7 });
   const [mode, setMode] = useState<SystemMode>('IDLE');
   const [calibCount, setCalibCount] = useState(0);
-  const [events, setEvents] = useState<ShotEvent[]>([]);
+  //const [events, setEvents] = useState<ShotEvent[]>([]);
+  // --- TILLFÄLLIG MOCK DATA FÖR ATT TESTA UI ---
+  const [events, setEvents] = useState<ShotEvent[]>(() => {
+    // Räkna ut ungefärlig mittpunkt baserat på din standard-config (4.8 / 2 = 2.4, 3.7 / 2 = 1.85)
+    const centerX = 2.4;
+    const centerY = 1.85;
+    
+    return Array.from({ length: 5 }).map((_, i) => {
+      // Lägg till en slumpmässig spridning (mellan -0.6 och +0.6 meter från mitten)
+      const randomX = centerX + (Math.random() * 1.2 - 0.6);
+      const randomY = centerY + (Math.random() * 1.2 - 0.6);
+      
+      return {
+        id: 9900 + i, // Tillfälligt högt ID så de inte krockar med nya riktiga skott
+        x: randomX,
+        y: randomY,
+        label: i === 4 ? "CLAP" : "CLAP",
+        nodes: ['N1', 'N2', 'N3', 'N4'],
+        timestamp: Date.now() - (5000 - i * 1000)
+      };
+    }).reverse(); // Vänder arrayen så den sista blir index 0
+  });
 
   // --- ANVÄNDARPOSITION ---
   const [userPos, setUserPos] = useState({ x: 2.4, y: 1.85 }); 
