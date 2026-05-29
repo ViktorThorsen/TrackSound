@@ -22,19 +22,15 @@ def predict_sound(raw_signal):
         return "DETECTION"
 
     try:
-        # 1. Se till att signalen är exakt 400ms (samma som vid träning)
         audio = raw_signal
         if len(audio) < SAMPLES:
             audio = np.pad(audio, (0, SAMPLES - len(audio)))
         else:
             audio = audio[:SAMPLES]
 
-        # 2. Skapa Mel-spektrogram
         mel_spec = librosa.feature.melspectrogram(y=audio, sr=FS, n_mels=128)
         mel_spec_db = librosa.power_to_db(mel_spec, ref=np.max)
 
-        # 3. Reshape för modellen (Batch, Height, Width, Channels)
-        # Vi lägger till en batch-dimension och en kanal-dimension
         input_data = mel_spec_db[np.newaxis, ..., np.newaxis]
 
         # 4. Prediktera
@@ -42,7 +38,6 @@ def predict_sound(raw_signal):
         class_idx = np.argmax(predictions[0])
         confidence = predictions[0][class_idx]
 
-        # Om AI:n är osäker, returnera UNKNOWN
         if confidence < 0.6:
             return "UNKNOWN"
             

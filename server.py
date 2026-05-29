@@ -13,10 +13,8 @@ app = Flask(__name__)
 CORS(app)
 socketio = SocketIO(app, cors_allowed_origins="*")
 
-# Ladda in AI
 load_audio_model()
 
-# --- API ENDPOINTS ---
 @app.route('/api/config', methods=['POST'])
 def update_config():
     data = request.json
@@ -39,12 +37,10 @@ def change_mode():
     print(f"System Mode: {state['mode']}")
     return jsonify({"status": "ok"})
 
-# Eventuella API:er för din LLM_Agent kan du lägga till här också!
 
 if __name__ == '__main__':
     update_sound_speed()
     
-    # Starta vår rena COM-portsläsare i en bakgrundstråd
     Thread(target=serial_reader, args=(socketio,), daemon=True).start()
     
     print("🚀 Servern är igång på port 5000!")

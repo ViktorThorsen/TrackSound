@@ -53,5 +53,4 @@ def serial_reader(socketio):
             
         elif tag == "EVENT_END":
             time.sleep(0.2)
-            # Vi skickar med socketio in i processorn så den kan prata med webbläsaren
             Thread(target=process_event, args=(socketio,)).start()
