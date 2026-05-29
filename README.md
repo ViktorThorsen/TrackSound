@@ -19,8 +19,8 @@ Projektet utvecklades som ett examensarbete vid NBI/Handelsakademin (2026).
 Systemet består av tre huvuddelar:
 
 1. **Hårdvara (C++ / Arduino)**
-   * **Sensor Nodes (`micnode.txt`):** 4 stycken ESP32 utrustade med MAX9814-mikrofoner som kontinuerligt samplar ljud och sparar i en rullande buffert. Vid en händelse skickas data via ESP-NOW.
-   * **Mainboard (`mainboard.txt`):** En central ESP32 som dirigerar nätverket, upprätthåller mikrosekundssynkronisering av klockor och skickar ljudpaketen vidare till PC via USB.
+   * **Sensor Nodes (`NodeBoard.ino`):** 4 stycken ESP32 utrustade med MAX9814-mikrofoner som kontinuerligt samplar ljud och sparar i en rullande buffert. Vid en händelse skickas data via ESP-NOW.
+   * **Mainboard (`MainBoard.ino`):** En central ESP32 som dirigerar nätverket, upprätthåller mikrosekundssynkronisering av klockor och skickar ljudpaketen vidare till PC via USB.
 
 2. **Backend (Python)**
    * **Inläsning (`serial_handler.py`):** Läser asynkront in datachunks från Mainboarden.
