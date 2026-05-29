@@ -36,9 +36,9 @@ Systemet består av tre huvuddelar:
 ## Installation och Användning
 
 ### 1. Förbered Hårdvaran
-* Flasha koden i `micnode.txt` till 4 stycken ESP32-mikrokontrollers kopplade till MAX9814-mikrofoner.
+* Flasha koden i `NodeBoard.ino` till 4 stycken ESP32-mikrokontrollers kopplade till MAX9814-mikrofoner.
 * Notera nodernas MAC-adresser (konfigurera dessa i systemet).
-* Flasha koden i `mainboard.txt` till en femte ESP32 som kopplas till datorn via USB.
+* Flasha koden i `MainBoard.ino` till en femte ESP32 som kopplas till datorn via USB.
 
 ### 2. Starta Backend (Python)
 Kräver Python 3.8+. Installera nödvändiga bibliotek:
