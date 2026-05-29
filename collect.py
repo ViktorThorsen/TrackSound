@@ -5,10 +5,9 @@ import wave
 import numpy as np
 import winsound
 
-# --- KONFIGURATION ---
-SERIAL_PORT = 'COM4'       # <--- Din port
+SERIAL_PORT = 'COM4'
 BAUD_RATE = 2000000
-LABEL = "clap"             # <--- "clap", "click" eller "other"
+LABEL = "clap"
 TOTAL_SAMPLES = 50         
 
 FS = 16000

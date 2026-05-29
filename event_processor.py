@@ -41,11 +41,8 @@ def process_event(socketio):
     
     print(f"\n--- Analys Händelse #{current_id} (Ref: Nod {ref_nid}) ---")
 
-    # --- NYTT: Dynamisk uträkning av max möjlig tidsdifferens ---
-    # 1. Räkna ut diagonalen på rummet/fältet i meter
     max_distance_meters = math.hypot(state['width'], state['height'])
     
-    # 2. Omvandla till tid + 20% felmarginal
     MAX_PHYSICAL_DIFF = (max_distance_meters / state['v_sound']) * 1.2
     # -------------------------------------------------------------
 
@@ -58,7 +55,6 @@ def process_event(socketio):
         
         print(f" Nod {nid}: Grov={coarse_delay*1000:.2f}ms, Fin={fine_delay*1000:.2f}ms, Tot={total_diff*1000:.2f}ms")
         
-        # --- NYTT: Använder MAX_PHYSICAL_DIFF istället för 0.012 ---
         if abs(total_diff) > MAX_PHYSICAL_DIFF: 
             print(f" [!] Ignorerar Nod {nid}: Orimlig tid för nuvarande skala (> {MAX_PHYSICAL_DIFF*1000:.1f}ms)")
             continue
@@ -72,7 +68,6 @@ def process_event(socketio):
         sound_type = predict_sound(waves[ref_nid])
         print(f" [+] POSITION: X={pos[0]:.2f}m, Y={pos[1]:.2f}m (Margin: {error:.2f}m) | AI: {sound_type}")
     
-        # Emitta till React-frontend
         socketio.emit('location_update', {
             'id': current_id, 'x': float(pos[0]), 'y': float(pos[1]),
             'label': sound_type, 'error': float(error),

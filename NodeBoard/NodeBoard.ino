@@ -2,8 +2,7 @@
 #include <esp_now.h>
 #include <esp_wifi.h>
 
-// --- KONFIGURATION ---
-const int NODE_ID = 4; // <--- ÄNDRA DENNA FÖR VARJE MICK (1, 2, 3, 4)
+const int NODE_ID = 4;
 const int micPin = 34;
 const int ledPin = 13;
 unsigned long lastSampleTime = 0;
@@ -125,7 +124,7 @@ void sendBuffer() {
         myPacket.type = 3;
         myPacket.nodeId = NODE_ID; 
         myPacket.chunkId = c; 
-        myPacket.timestampUs = triggerMicros + timeOffset; // Skicka den synkade tiden här med!
+        myPacket.timestampUs = triggerMicros + timeOffset;
         
         for (int s = 0; s < CHUNK_SIZE; s++) {
             int idx = (startIdx + (c * CHUNK_SIZE) + s) % RECORD_WINDOW_SAMPLES;
@@ -174,12 +173,10 @@ void loop() {
     yield(); 
     unsigned long now = micros();
 
-    // --- NYTT: Trafiksäker Tids-synk (Round Robin) ---
     unsigned long currentMillis = millis();
-    unsigned long cycle = currentMillis % 2000; // Skapar en 2-sekunders loop (0-1999 ms)
-    unsigned long myTurn = NODE_ID * 400;       // Nod 1 = 400ms, Nod 2 = 800ms, Nod 3 = 1200ms, Nod 4 = 1600ms
+    unsigned long cycle = currentMillis % 2000;
+    unsigned long myTurn = NODE_ID * 400;
 
-    // Synka BARA om det gått 1.5 sek, OCH noden befinner sig i sitt unika tidsfönster (en lucka på 100ms)
     if (currentState == IDLE && (currentMillis - lastSyncReq > 1500) && (cycle >= myTurn) && (cycle < myTurn + 100)) {
         sync_req_packet req;
         req.type = 8;
@@ -211,11 +208,11 @@ void loop() {
                     silenceCounter = 0;
                 }
             } 
-            else if (signal > triggerThreshold && isSynced && millis() > blindUntil) { // Måste vara synkad för att trigga!
-                triggerMicros = now; // Lokal tidsstämpel
+            else if (signal > triggerThreshold && isSynced && millis() > blindUntil) {
+                triggerMicros = now;
                 digitalWrite(ledPin, HIGH);
                 
-                pingPending = true; // Fördröjd sändning (Non-blocking)
+                pingPending = true;
                 currentState = RECORDING; 
                 isArmed = false; 
                 samplesSinceTrigger = 0;
@@ -223,12 +220,10 @@ void loop() {
             }
         } 
         
-        // --- NYTT: Skicka PING fördröjt, men med EXAKT uträknad tid ---
         if (pingPending && (now - triggerMicros >= (NODE_ID * 25000))) {
             myPing.type = 4;
             myPing.nodeId = NODE_ID;
             
-            // MAGIN HÄNDER HÄR: Vi lägger vår lokala tid + offseten!
             myPing.syncTime = triggerMicros + timeOffset; 
             
             esp_now_send(mainNodeAddress, (uint8_t *) &myPing, sizeof(myPing));
@@ -236,7 +231,6 @@ void loop() {
             Serial.println("Skickade PING med kompenserad tidsstämpel.");
         }
 
-        // 2. SPARA LJUDET (Exakt 16000 Hz)
         if (now - lastSampleTime >= 62) {
             lastSampleTime = now;
             audioBuffer[head] = (uint16_t)raw;

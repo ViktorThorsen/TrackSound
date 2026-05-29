@@ -215,22 +215,18 @@ export default function App() {
   //   }).reverse(); // Vänder arrayen så den sista blir index 0
   // });
 
-  // --- ANVÄNDARPOSITION ---
   const [userPos, setUserPos] = useState({ x: 2.4, y: 1.85 }); 
   const [isDraggingUser, setIsDraggingUser] = useState(false);
 
-  // --- SHOOTING RANGE ---
   const [shootingRange, setShootingRange] = useState({ x: 1.5, y: 1.5, w: 1.5, h: 1.0 });
   const [isDraggingRange, setIsDraggingRange] = useState(false);
 
-  // --- UI TOGGLES (NYTT) ---
   const [isCommunityScale, setIsCommunityScale] = useState(false);
   const [showShootingRange, setShowShootingRange] = useState(false);
   const [showUserPos, setShowUserPos] = useState(false);
 
   const scaleMult = isCommunityScale ? 100 : 1; 
 
-  // --- RESIZE OBSERVER ---
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const roomRef = useRef<HTMLDivElement>(null);
   const [roomDims, setRoomDims] = useState({ w: 0, h: 0, pxPerMeter: 0 });
@@ -321,7 +317,6 @@ export default function App() {
 
   // --- DRAG LOGIK ---
   const handlePointerDown = (e: React.PointerEvent, target: 'user' | 'range') => {
-    // Tillåt bara drag om Community Scale är igång och vi faktiskt visar komponenten
     if (!isCommunityScale) return;
     if (target === 'user' && !showUserPos) return;
     if (target === 'range' && !showShootingRange) return;

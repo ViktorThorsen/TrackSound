@@ -13,29 +13,25 @@ uint8_t nodeAddresses[5][6] = {
     {0x34,0x5F,0x45,0x37,0xAB,0xAC} 
 };
 
-unsigned long lastSeen[5] = {0}; // Håller koll på när vi senast hörde från varje nod
+unsigned long lastSeen[5] = {0};
 unsigned long lastStatusPrint = 0;
 int activeNodes = 0;
 int previousActiveNodes = -1;
 bool nodeOnline[5] = {false};
 
-// --- UPPDATERADE STRUKTURER ---
 
-// 1. PING-paketet innehåller nu nodens exakta tid (ingen jitter!)
 typedef struct ping_packet {
     uint8_t type;
     uint8_t nodeId;
-    uint32_t syncTime; // <--- NYTT: Noden skickar sin synkade tid
+    uint32_t syncTime;
 } ping_packet;
 
-// 2. Paket för att Noden ber om tiden
 typedef struct sync_req_packet {
     uint8_t type; // 8
     uint8_t nodeId;
     uint32_t node_t1;
 } sync_req_packet;
 
-// 3. Paket för att Mainboarden svarar med tiden
 typedef struct sync_ack_packet {
     uint8_t type; // 9
     uint32_t node_t1;
@@ -62,25 +58,22 @@ int currentInQueue = 0;
 void OnDataRecv(const esp_now_recv_info_t *recv_info, const uint8_t *incomingData, int len) {
     uint8_t type = incomingData[0];
 
-    // --- NYTT: MAINBOARD AGERAR TIDSSERVER (PING-PONG) ---
     if (type == 8) { 
         sync_req_packet *req = (sync_req_packet *)incomingData;
         lastSeen[req->nodeId] = millis();
         sync_ack_packet ack;
         ack.type = 9;
         ack.node_t1 = req->node_t1;
-        ack.main_t2 = micros(); // Tidsstämpla exakt nu!
+        ack.main_t2 = micros();
 
-        // Skicka tillbaka direkt
         esp_now_send(nodeAddresses[req->nodeId], (uint8_t *) &ack, sizeof(ack));
         return;
     }
 
-    else if (type == 4) { // PING
+    else if (type == 4) {
         ping_packet *p = (ping_packet *)incomingData;
         uint8_t nid = p->nodeId;
         
-        // --- NYTT: Lita på nodens tid, strunta i när paketet kom fram! ---
         uint32_t accurateTime = p->syncTime; 
 
         if (!isCollecting) {
@@ -96,12 +89,12 @@ void OnDataRecv(const esp_now_recv_info_t *recv_info, const uint8_t *incomingDat
 
         if (nid >= 1 && nid <= 4 && !pingsReceived[nid]) {
             pingsReceived[nid] = true;
-            storedRefereeTimes[nid] = accurateTime; // Spara nodens beräknade tid
+            storedRefereeTimes[nid] = accurateTime;
             queue[queueSize] = nid;
             queueSize++;
         }
     } 
-    else if (type == 3) { // DATA (Chunks)
+    else if (type == 3) {
         lastDataTime = millis();
         struct_packet *p = (struct_packet *)incomingData;
         
@@ -148,19 +141,16 @@ void loop() {
             String missing = "";
             
             for (int i = 1; i <= 4; i++) {
-                // Noderna synkar var 2:a sekund. Om vi inte hört från dem på 4 sek, är de offline.
                 bool isNowOnline = (now - lastSeen[i] < 4000 && lastSeen[i] != 0); 
                 
-                // Om noden precis vaknade till liv (t.ex. efter att du tryckt Reset)
                 if (isNowOnline && !nodeOnline[i]) {
                     Serial.printf("STATUS|[+] Nod %d upptäcktes och är nu ansluten!\n", i);
                 } 
-                // Om vi nyss tappade kontakten med noden
                 else if (!isNowOnline && nodeOnline[i]) {
                     Serial.printf("STATUS|[-] Förlorade anslutningen till Nod %d!\n", i);
                 }
                 
-                nodeOnline[i] = isNowOnline; // Uppdatera minnet till nästa runda
+                nodeOnline[i] = isNowOnline;
                 
                 if (isNowOnline) {
                     activeCount++;
@@ -169,7 +159,6 @@ void loop() {
                 }
             }
             
-            // Sammanfattande text
             if (activeCount == 0) {
                 Serial.println("STATUS|Inga noder anslutna, letar...");
             } else if (activeCount < 4) {
@@ -182,7 +171,6 @@ void loop() {
         }
     }
     if (isCollecting) {
-        // FAS 1: Vänta in alla PINGs
         if (!waitingForData && (now - eventStartTime > 500)) { 
             if (queueSize >= 3) { 
                 Serial.println("EVENT_START");
@@ -192,7 +180,7 @@ void loop() {
                     int nid = queue[i];
                     Serial.printf("SYNC|%d|%u\n", nid, storedRefereeTimes[nid]);
                     Serial.flush(); 
-                    delay(50); // Ge Python tid att läsa
+                    delay(50);
                 }
                 
                 waitingForData = true;
@@ -210,7 +198,6 @@ void loop() {
             }
         }
 
-        // FAS 2: Hantera kön för chunks (Hämta en nod i taget)
         if (waitingForData) {
             if (currentInQueue < queueSize) {
                 int activeNode = queue[currentInQueue];

@@ -1,6 +1,5 @@
 import numpy as np
 
-# --- GLOBAL STATE ---
 state = {
     'width': 4.8, 
     'height': 3.7, 
