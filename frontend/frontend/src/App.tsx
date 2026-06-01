@@ -369,7 +369,7 @@ export default function App() {
           <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
             <Radar size={32} className={mode === 'DETECTING' ? 'pulse' : ''} />
             <div>
-              <h1 style={{ margin: 0, fontSize: '1.5rem', letterSpacing: '2px' }}>GSR PRO <span style={{fontSize:'0.8rem', color:'#666'}}>v4.9</span></h1>
+              <h1 style={{ margin: 0, fontSize: '1.5rem', letterSpacing: '2px' }}>Sound Tracker <span style={{fontSize:'0.8rem', color:'#666'}}>v4.9</span></h1>
               <div style={{ fontSize: '0.7rem', color: '#666' }}>ACOUSTIC MULTILATERATION SYSTEM</div>
             </div>
           </div>
